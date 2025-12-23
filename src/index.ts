@@ -4,7 +4,7 @@ import { serializeError } from 'serialize-error'
 import { createGcpLoggingPinoConfig } from '@google-cloud/pino-logging-gcp-config'
 import { PinoTransport } from '@loglayer/transport-pino'
 import { getSimplePrettyTerminal } from '@loglayer/transport-simple-pretty-terminal'
-import type { ILogLayer } from 'loglayer'
+import type { ILogLayer, LogLayerTransport } from 'loglayer'
 
 /**
  * Logger type alias for LogLayer
@@ -75,20 +75,18 @@ function detectEnvironment(): string {
 export function createLogger(options?: LoggerOptions): Logger {
   const environment = options?.environment ?? detectEnvironment()
   const errorSerializer = options?.errorSerializer ?? serializeError
-  const transport = []
+  const transport: LogLayerTransport[] = []
 
   // Production environment: use pino with GCP config
   if (environment === 'production') {
-    const loggerConfig = createGcpLoggingPinoConfig() as any
+    const loggerConfig = createGcpLoggingPinoConfig()
     transport.push(
       new PinoTransport({
-        logger: pino(loggerConfig),
+        logger: pino(loggerConfig as any),
       })
     )
-  }
-
-  // Development environment: use pretty terminal transport
-  if (environment === 'development') {
+  } else {
+    // Development or any other environment: use pretty terminal transport
     transport.push(
       getSimplePrettyTerminal({
         runtime: 'node',

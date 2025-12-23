@@ -64,6 +64,11 @@ describe('createLogger', () => {
     expect(logger).toBeDefined()
   })
 
+  it('should use development transport for unknown environments', () => {
+    const logger = createLogger({ environment: 'staging' })
+    expect(logger).toBeDefined()
+  })
+
   it('should handle logging calls without errors', () => {
     const logger = createLogger({ environment: 'development' })
     
