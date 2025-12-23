@@ -1,0 +1,58 @@
+{
+  "name": "@taiwanta/js-gcp-logger",
+  "version": "0.1.0",
+  "description": "Zero-config GCP logger integration with loglayer + pino",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "gcp",
+    "logging",
+    "logger",
+    "pino",
+    "loglayer",
+    "google-cloud",
+    "cloud-run"
+  ],
+  "author": "",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TaiwanTA/js-gcp-logger.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "dependencies": {
+    "@google-cloud/pino-logging-gcp-config": "^1.0.0",
+    "@loglayer/transport-pino": "^2.2.17",
+    "@loglayer/transport-simple-pretty-terminal": "^2.3.1",
+    "loglayer": "^8.4.0",
+    "pino": "^9.0.0",
+    "serialize-error": "^11.0.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0",
+    "vitest": "^4.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
