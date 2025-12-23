@@ -7,66 +7,66 @@ import { getSimplePrettyTerminal } from '@loglayer/transport-simple-pretty-termi
 import type { ILogLayer, LogLayerTransport } from 'loglayer'
 
 /**
- * Logger type alias for LogLayer
+ * Logger 型別別名，對應 LogLayer
  */
 export type Logger = ILogLayer
 
 /**
- * Configuration options for creating a logger
+ * Logger 配置選項
  */
 export interface LoggerOptions {
   /**
-   * Override environment detection. If not provided, uses NODE_ENV
+   * 覆寫環境偵測。若未提供，則使用 NODE_ENV
    */
   environment?: 'production' | 'development' | string
   
   /**
-   * Custom error serializer function
+   * 自訂錯誤序列化函式
    */
   errorSerializer?: (error: Error) => Record<string, unknown>
 }
 
 /**
- * Detects the current runtime environment
- * @returns 'production' if running in production, 'development' otherwise
+ * 偵測當前執行環境
+ * @returns 若為生產環境回傳 'production'，否則回傳 'development'
  */
 function detectEnvironment(): string {
-  // Check NODE_ENV first
+  // 優先檢查 NODE_ENV
   if (process.env.NODE_ENV) {
     return process.env.NODE_ENV
   }
   
-  // Check for GCP Cloud Run environment variables
+  // 檢查 GCP Cloud Run 環境變數
   if (process.env.K_SERVICE || process.env.K_REVISION || process.env.K_CONFIGURATION) {
     return 'production'
   }
   
-  // Default to development
+  // 預設為開發環境
   return 'development'
 }
 
 /**
- * Creates a logger instance with automatic transport switching based on environment
+ * 建立具有自動傳輸切換功能的 logger 實例（依據環境）
  * 
- * In production environments (e.g., GCP Cloud Run):
- * - Uses pino with @google-cloud/pino-logging-gcp-config
+ * 在生產環境（例如 GCP Cloud Run）：
+ * - 使用 pino + @google-cloud/pino-logging-gcp-config
  * 
- * In development environments:
- * - Uses @loglayer/transport-simple-pretty-terminal
+ * 在開發環境：
+ * - 使用 @loglayer/transport-simple-pretty-terminal
  * 
- * @param options - Optional configuration for the logger
- * @returns A configured Logger instance
+ * @param options - Logger 的選用配置
+ * @returns 已配置的 Logger 實例
  * 
  * @example
  * ```typescript
- * // Auto-detect environment
+ * // 自動偵測環境
  * const logger = createLogger()
  * logger.info('Hello, world!')
  * 
- * // Force production mode
+ * // 強制使用生產模式
  * const prodLogger = createLogger({ environment: 'production' })
  * 
- * // Custom error serializer
+ * // 自訂錯誤序列化器
  * const customLogger = createLogger({
  *   errorSerializer: (error) => ({ message: error.message })
  * })
@@ -77,7 +77,7 @@ export function createLogger(options?: LoggerOptions): Logger {
   const errorSerializer = options?.errorSerializer ?? serializeError
   const transport: LogLayerTransport[] = []
 
-  // Production environment: use pino with GCP config
+  // 生產環境：使用 pino 搭配 GCP 設定
   if (environment === 'production') {
     const loggerConfig = createGcpLoggingPinoConfig()
     transport.push(
@@ -86,7 +86,7 @@ export function createLogger(options?: LoggerOptions): Logger {
       })
     )
   } else {
-    // Development or any other environment: use pretty terminal transport
+    // 開發環境或其他環境：使用美化終端傳輸
     transport.push(
       getSimplePrettyTerminal({
         runtime: 'node',
@@ -95,12 +95,12 @@ export function createLogger(options?: LoggerOptions): Logger {
     )
   }
 
-  // Create and return the LogLayer instance
+  // 建立並回傳 LogLayer 實例
   return new LogLayer({
     errorSerializer,
     transport,
   })
 }
 
-// Re-export LogLayer for convenience
+// 為方便使用，重新匯出 LogLayer
 export { LogLayer }

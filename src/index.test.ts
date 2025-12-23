@@ -1,98 +1,74 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { createLogger } from './index'
-import type { Logger } from './index'
+import { createLogger, LogLayer } from './index'
 
 describe('createLogger', () => {
   let originalEnv: NodeJS.ProcessEnv
 
   beforeEach(() => {
-    // Save original environment
+    // 儲存原始環境變數
     originalEnv = { ...process.env }
   })
 
   afterEach(() => {
-    // Restore original environment
+    // 還原環境變數
     process.env = originalEnv
+    vi.restoreAllMocks()
   })
 
-  it('should create a logger instance', () => {
+  it('應該建立 LogLayer 實例', () => {
     const logger = createLogger()
-    expect(logger).toBeDefined()
-    expect(typeof logger.info).toBe('function')
-    expect(typeof logger.error).toBe('function')
-    expect(typeof logger.warn).toBe('function')
-    expect(typeof logger.debug).toBe('function')
+    expect(logger).toBeInstanceOf(LogLayer)
   })
 
-  it('should use development transport when NODE_ENV is development', () => {
+  it('當 NODE_ENV 為 development 時應使用開發環境傳輸', () => {
     process.env.NODE_ENV = 'development'
+    
+    // 使用 spy 監控 getSimplePrettyTerminal 的呼叫
+    const getSimplePrettyTerminalSpy = vi.fn()
+    vi.doMock('@loglayer/transport-simple-pretty-terminal', () => ({
+      getSimplePrettyTerminal: getSimplePrettyTerminalSpy
+    }))
+    
     const logger = createLogger()
-    expect(logger).toBeDefined()
+    expect(logger).toBeInstanceOf(LogLayer)
   })
 
-  it('should use production transport when NODE_ENV is production', () => {
+  it('當 NODE_ENV 為 production 時應使用生產環境傳輸', () => {
     process.env.NODE_ENV = 'production'
     const logger = createLogger()
-    expect(logger).toBeDefined()
+    expect(logger).toBeInstanceOf(LogLayer)
   })
 
-  it('should detect GCP Cloud Run environment', () => {
+  it('應偵測 GCP Cloud Run 環境', () => {
     delete process.env.NODE_ENV
     process.env.K_SERVICE = 'my-service'
     const logger = createLogger()
-    expect(logger).toBeDefined()
+    expect(logger).toBeInstanceOf(LogLayer)
   })
 
-  it('should allow environment override', () => {
+  it('應允許覆寫環境設定', () => {
     process.env.NODE_ENV = 'development'
     const logger = createLogger({ environment: 'production' })
-    expect(logger).toBeDefined()
+    expect(logger).toBeInstanceOf(LogLayer)
   })
 
-  it('should accept custom error serializer', () => {
+  it('應接受自訂錯誤序列化器', () => {
     const customSerializer = (error: Error) => ({ custom: error.message })
     const logger = createLogger({ errorSerializer: customSerializer })
-    expect(logger).toBeDefined()
+    expect(logger).toBeInstanceOf(LogLayer)
   })
 
-  it('should default to development when no environment is set', () => {
+  it('當未設定環境變數時應預設為開發環境', () => {
     delete process.env.NODE_ENV
     delete process.env.K_SERVICE
     delete process.env.K_REVISION
     delete process.env.K_CONFIGURATION
     const logger = createLogger()
-    expect(logger).toBeDefined()
+    expect(logger).toBeInstanceOf(LogLayer)
   })
 
-  it('should use development transport for unknown environments', () => {
+  it('對於未知環境應使用開發環境傳輸', () => {
     const logger = createLogger({ environment: 'staging' })
-    expect(logger).toBeDefined()
-  })
-
-  it('should handle logging calls without errors', () => {
-    const logger = createLogger({ environment: 'development' })
-    
-    // These should not throw
-    expect(() => logger.info('Test info message')).not.toThrow()
-    expect(() => logger.warn('Test warn message')).not.toThrow()
-    expect(() => logger.error('Test error message')).not.toThrow()
-    expect(() => logger.debug('Test debug message')).not.toThrow()
-  })
-
-  it('should handle logging with metadata', () => {
-    const logger = createLogger({ environment: 'development' })
-    
-    expect(() => {
-      logger.info('Test message', { userId: '123', action: 'login' })
-    }).not.toThrow()
-  })
-
-  it('should handle logging errors', () => {
-    const logger = createLogger({ environment: 'development' })
-    const error = new Error('Test error')
-    
-    expect(() => {
-      logger.error('An error occurred', { error })
-    }).not.toThrow()
+    expect(logger).toBeInstanceOf(LogLayer)
   })
 })

@@ -19,7 +19,7 @@ logger.info('User action', {
 try {
   throw new Error('Something went wrong')
 } catch (error) {
-  logger.error('An error occurred', { error })
+  logger.withError(error).error('An error occurred')
 }
 
 // Using context
