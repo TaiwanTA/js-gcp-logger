@@ -21,15 +21,7 @@
     "lint": "tsc --noEmit",
     "prepublishOnly": "npm run build"
   },
-  "keywords": [
-    "gcp",
-    "logging",
-    "logger",
-    "pino",
-    "loglayer",
-    "google-cloud",
-    "cloud-run"
-  ],
+  "keywords": [],
   "author": "",
   "license": "MIT",
   "repository": {
@@ -40,12 +32,12 @@
     "registry": "https://npm.pkg.github.com"
   },
   "dependencies": {
-    "@google-cloud/pino-logging-gcp-config": "^1.0.0",
+    "@google-cloud/pino-logging-gcp-config": "^1.3.1",
     "@loglayer/transport-pino": "^2.2.17",
     "@loglayer/transport-simple-pretty-terminal": "^2.3.1",
     "loglayer": "^8.4.0",
-    "pino": "^9.0.0",
-    "serialize-error": "^11.0.3"
+    "pino": "^10.1.0",
+    "serialize-error": "^12.0.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
