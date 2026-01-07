@@ -126,6 +126,33 @@ const trace = getTraceContext()
 // { traceId, spanId, requestId, traceSampled }
 ```
 
+## LogLayer API
+
+此套件使用 [LogLayer](https://loglayer.dev/) 作為日誌抽象層。LogLayer 採用鏈式 API 附加 metadata 和錯誤：
+
+```typescript
+// 附加 metadata
+logger.withMetadata({ userId: '123', action: 'login' }).info('使用者登入')
+
+// 附加錯誤
+logger.withError(new Error('連線失敗')).error('資料庫錯誤')
+
+// 組合使用
+logger
+  .withMetadata({ orderId: 'A001' })
+  .withError(err)
+  .error('訂單處理失敗')
+
+// 建立帶有持久 context 的子 logger
+const orderLogger = logger.withContext({ orderId: 'A001' })
+orderLogger.info('開始處理')  // 自動包含 orderId
+orderLogger.info('處理完成')  // 自動包含 orderId
+```
+
+> **注意**：LogLayer 不支援 `logger.info(msg, data)` 語法，必須使用 `withMetadata()` 附加資料。
+>
+> 完整 API 請參考 [LogLayer 官方文檔](https://loglayer.dev/)。
+
 ## 環境行為
 
 | 環境 | 傳輸 | 輸出格式 |
