@@ -16,8 +16,8 @@
 此套件發布於 GitHub Packages，需先配置 npm registry：
 
 ```bash
-# 1. 在專案目錄建立 .npmrc
-echo "@taiwanta:registry=https://npm.pkg.github.com" >> .npmrc
+# 1. 配置 @taiwanta scope 的 registry
+npm config set @taiwanta:registry https://npm.pkg.github.com
 
 # 2. 安裝套件
 npm install @taiwanta/js-gcp-logger
