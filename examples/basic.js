@@ -9,11 +9,11 @@ logger.debug('Debug information')
 logger.warn('Warning message')
 
 // Logging with metadata
-logger.info('User action', {
+logger.withMetadata({
   userId: '12345',
   action: 'login',
   timestamp: new Date().toISOString()
-})
+}).info('User action')
 
 // Logging errors
 try {

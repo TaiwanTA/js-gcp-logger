@@ -82,11 +82,11 @@ app.get('/log-test', (c) => {
   log?.info('這是 info 級別日誌')
   log?.warn('這是 warn 級別日誌')
 
-  log?.info('帶有 metadata 的日誌', {
+  log?.withMetadata({
     userId: 'user-123',
     action: 'test',
     timestamp: new Date().toISOString(),
-  })
+  }).info('帶有 metadata 的日誌')
 
   return c.json({
     message: '已輸出多個日誌，請檢查終端機輸出',
