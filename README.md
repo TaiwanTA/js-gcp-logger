@@ -1,204 +1,144 @@
 # js-gcp-logger
 
-一个零配置的 GCP 日志集成，使用 `loglayer` + `pino` 为 Node.js 应用。
+零配置的 GCP 日誌整合，使用 `loglayer` + `pino` 為 Node.js 應用。
 
 ## 特性
 
-- 🚀 **零配置**：开箱即用，具有合理的默认设置
-- 🔄 **自动切换传输**：自动检测环境并使用适当的传输
-  - 生产环境 (GCP Cloud Run)：`pino` 与 `@google-cloud/pino-logging-gcp-config`
-  - 开发/本地环境：`@loglayer/transport-simple-pretty-terminal`
-- 🎯 **类型安全**：完整的 TypeScript 支持
-- 🎨 **漂亮的控制台输出**：开发环境中美丽、可读的日志
-- ☁️ **GCP 就绪**：针对 Google Cloud Platform 日志优化
+- 🚀 **零配置**：開箱即用，具有合理的預設值
+- 🔄 **自動切換傳輸**：自動偵測環境並使用適當的傳輸
+  - 生產環境 (GCP Cloud Run)：`pino` + `@google-cloud/pino-logging-gcp-config`
+  - 開發環境：`@loglayer/transport-simple-pretty-terminal`
+- 🔗 **請求追蹤**：透過 Hono middleware 自動關聯 GCP trace context
+- 🎯 **型別安全**：完整的 TypeScript 支援
 
-## 安装
+## 安裝
 
 ```bash
 npm install @taiwanta/js-gcp-logger
 ```
 
-或使用 bun：
+## 快速開始
 
-```bash
-bun add @taiwanta/js-gcp-logger
-```
-
-## 快速开始
+### 基本使用
 
 ```typescript
 import { createLogger } from '@taiwanta/js-gcp-logger'
 
-// 自动检测环境并配置日志器
 const logger = createLogger()
 
-// 开始记录日志！
-logger.info('应用启动')
-logger.warn('警告消息', { userId: '123' })
-logger.error('发生错误', { error: new Error('出了些问题') })
+logger.info('應用啟動')
+logger.warn('警告訊息', { userId: '123' })
+logger.error('發生錯誤', { error: new Error('出了問題') })
 ```
+
+### 搭配 Hono 使用（推薦）
+
+在 GCP Cloud Run 上使用時，透過 middleware 自動關聯同一請求的所有日誌：
+
+```typescript
+import { Hono } from 'hono'
+import { createLogger, getRequestLogger } from '@taiwanta/js-gcp-logger'
+import { gcpLoggerMiddleware } from '@taiwanta/js-gcp-logger/middleware/hono'
+
+const app = new Hono()
+const logger = createLogger()
+
+// 套用 middleware
+app.use('*', gcpLoggerMiddleware({ logger }))
+
+app.get('/', (c) => {
+  const log = getRequestLogger()
+  log?.info('處理請求')  // 自動包含 trace context
+  return c.text('OK')
+})
+
+export default app
+```
+
+就這樣！在 Cloud Run 上，同一請求的日誌會自動關聯在一起。
 
 ## API
 
-### `createLogger(options?: LoggerOptions): Logger`
+### `createLogger(options?)`
 
-使用自动环境检测创建新的日志器实例。
-
-**参数：**
-
-- `options.environment` (可选)：覆盖环境检测。值：`'production'` | `'development'` | string
-- `options.errorSerializer` (可选)：自定义错误序列化函数
-
-**返回：** `Logger` 实例（`LogLayer` 的别名）
-
-**示例：**
+建立 logger 實例。
 
 ```typescript
-// 自动检测环境
+// 自動偵測環境
 const logger = createLogger()
 
-// 强制生产模式
+// 強制生產模式
 const prodLogger = createLogger({ environment: 'production' })
 
-// 自定义错误序列化器
+// 自訂錯誤序列化器
 const customLogger = createLogger({
-  errorSerializer: (error) => ({
-    message: error.message,
-    stack: error.stack,
-    code: error.code,
-  })
+  errorSerializer: (error) => ({ message: error.message, code: error.code })
 })
 ```
 
-### 环境检测
+**選項：**
+- `environment`：覆寫環境偵測（`'production'` | `'development'`）
+- `errorSerializer`：自訂錯誤序列化函式
 
-日志器使用以下逻辑自动检测运行时环境：
+### `gcpLoggerMiddleware(options)`
 
-1. 检查 `NODE_ENV` 环境变量
-2. 检查 GCP Cloud Run 环境变量（`K_SERVICE`、`K_REVISION`、`K_CONFIGURATION`）
-3. 默认设置为 `'development'`
-
-您可以通过向 `createLogger()` 传递 `environment` 选项来覆盖此设置。
-
-## 使用示例
-
-### 基本日志记录
+Hono middleware，自動處理 GCP trace context。
 
 ```typescript
-import { createLogger } from '@taiwanta/js-gcp-logger'
+import { gcpLoggerMiddleware } from '@taiwanta/js-gcp-logger/middleware/hono'
 
-const logger = createLogger()
-
-logger.trace('跟踪消息')
-logger.debug('调试消息')
-logger.info('信息消息')
-logger.warn('警告消息')
-logger.error('错误消息')
-logger.fatal('致命错误消息')
+app.use('*', gcpLoggerMiddleware({
+  logger,                              // 必填：logger 實例
+  projectId: process.env.GOOGLE_CLOUD_PROJECT  // 選填：預設從環境變數取得
+}))
 ```
 
-### 使用元数据记录日志
+### `getRequestLogger()`
+
+在請求處理中取得帶有 trace context 的 logger。
 
 ```typescript
-logger.info('用户登录', {
-  userId: '12345',
-  email: 'user@example.com',
-  timestamp: new Date().toISOString()
+import { getRequestLogger } from '@taiwanta/js-gcp-logger'
+
+app.get('/', (c) => {
+  const log = getRequestLogger()
+  log?.info('這條日誌會自動包含 trace context')
+  return c.text('OK')
 })
 ```
 
-### 记录错误
+### `getTraceContext()`
+
+取得當前請求的 trace 資訊（進階用途）。
 
 ```typescript
-try {
-  // 可能抛出的代码
-} catch (error) {
-  logger.error('操作失败', { error })
-}
+import { getTraceContext } from '@taiwanta/js-gcp-logger'
+
+const trace = getTraceContext()
+// { traceId, spanId, requestId, traceSampled }
 ```
 
-### 使用日志器上下文
+## 環境行為
 
-```typescript
-const logger = createLogger()
+| 環境 | 傳輸 | 輸出格式 |
+|------|------|----------|
+| 開發 (`NODE_ENV=development`) | pretty-terminal | 彩色、易讀 |
+| 生產 (`NODE_ENV=production` 或 Cloud Run) | pino + GCP config | 結構化 JSON |
 
-// 添加上下文，将包含在所有后续日志中
-const contextLogger = logger.withContext({ requestId: 'abc-123', service: 'api' })
+環境偵測順序：
+1. `NODE_ENV` 環境變數
+2. GCP Cloud Run 環境變數（`K_SERVICE`、`K_REVISION`、`K_CONFIGURATION`）
+3. 預設為 `development`
 
-contextLogger.info('处理请求') // 日志中将包含 requestId 和 service
-```
-
-## 环境特定行为
-
-### 开发模式
-
-在开发模式下（当 `NODE_ENV=development` 或不在生产环境中）：
-
-- 使用 `@loglayer/transport-simple-pretty-terminal`
-- 显示彩色、格式化的日志
-- 显示带有时间戳的扩展视图
-- 在终端中易于阅读
-
-### 生产模式
-
-在生产模式下（当 `NODE_ENV=production` 或在 GCP Cloud Run 上运行）：
-
-- 使用 `pino` 与 `@google-cloud/pino-logging-gcp-config`
-- 结构化 JSON 日志记录
-- 针对 Google Cloud Logging 优化
-- 包含跟踪上下文和严重性级别
-
-## TypeScript 支持
-
-此包是用 TypeScript 编写的，并提供完整的类型定义：
-
-```typescript
-import type { Logger, LoggerOptions } from '@taiwanta/js-gcp-logger'
-
-const options: LoggerOptions = {
-  environment: 'production',
-  errorSerializer: (error) => ({ message: error.message })
-}
-
-const logger: Logger = createLogger(options)
-```
-
-## 开发
-
-### 安装依赖
+## 開發
 
 ```bash
-npm install
+npm install    # 安裝依賴
+npm run build  # 建置
+npm test       # 測試
+npm run lint   # 型別檢查
 ```
 
-### 构建
-
-```bash
-npm run build
-```
-
-### 测试
-
-```bash
-npm test
-```
-
-### 代码检查
-
-```bash
-npm run lint
-```
-
-## 许可证
+## 授權
 
 MIT
-
-## 贡献
-
-欢迎贡献！请随时提交拉取请求。
-
-## 相关项目
-
-- [loglayer](https://loglayer.dev) - 现代日志抽象
-- [pino](https://getpino.io) - 快速 Node.js 日志器
-- [@google-cloud/pino-logging-gcp-config](https://www.npmjs.com/package/@google-cloud/pino-logging-gcp-config) - Pino 的 GCP 日志配置

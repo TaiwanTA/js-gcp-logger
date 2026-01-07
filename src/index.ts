@@ -31,17 +31,14 @@ export interface LoggerOptions {
  * @returns 若為生產環境回傳 'production'，否則回傳 'development'
  */
 function detectEnvironment(): string {
-  // 優先檢查 NODE_ENV
   if (process.env.NODE_ENV) {
     return process.env.NODE_ENV
   }
   
-  // 檢查 GCP Cloud Run 環境變數
   if (process.env.K_SERVICE || process.env.K_REVISION || process.env.K_CONFIGURATION) {
     return 'production'
   }
   
-  // 預設為開發環境
   return 'development'
 }
 
@@ -102,5 +99,11 @@ export function createLogger(options?: LoggerOptions): Logger {
   })
 }
 
-// 為方便使用，重新匯出 LogLayer
 export { LogLayer }
+
+export {
+  getRequestLogger,
+  getTraceContext,
+  asyncLocalStorage,
+} from './context'
+export type { TraceContext, RequestStore } from './context'
