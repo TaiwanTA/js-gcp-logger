@@ -27,8 +27,8 @@ import { createLogger } from '@taiwanta/js-gcp-logger'
 const logger = createLogger()
 
 logger.info('應用啟動')
-logger.warn('警告訊息', { userId: '123' })
-logger.error('發生錯誤', { error: new Error('出了問題') })
+logger.withMetadata({ userId: '123' }).warn('警告訊息')
+logger.withError(new Error('出了問題')).error('發生錯誤')
 ```
 
 ### 搭配 Hono 使用（推薦）
