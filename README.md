@@ -21,17 +21,22 @@
 
 詳細步驟請參考 [GitHub 官方文件](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry#authenticating-to-github-packages)。
 
-### 2. 配置 npm
+### 2. 配置 .npmrc
 
-```bash
-# 設定 registry（全域）
-npm config set --global @taiwanta:registry https://npm.pkg.github.com
+在 `~/.npmrc`（全域）或專案目錄的 `.npmrc` 中加入：
 
-# 設定認證 token（全域）
-npm config set --global //npm.pkg.github.com/:_authToken YOUR_GITHUB_PAT
+```ini
+@taiwanta:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=YOUR_GITHUB_PAT
 ```
 
-> 移除 `--global` 可改為專案層級設定（寫入當前目錄的 `.npmrc`）。
+或使用指令建立：
+
+```bash
+# 全域設定（~/.npmrc）
+echo "@taiwanta:registry=https://npm.pkg.github.com" >> ~/.npmrc
+echo "//npm.pkg.github.com/:_authToken=YOUR_GITHUB_PAT" >> ~/.npmrc
+```
 
 ### 3. 安裝套件
 
