@@ -17,7 +17,7 @@
 
 ### 1. 建立 Personal Access Token (PAT)
 
-前往 [GitHub Settings > Developer settings > Personal access tokens](https://github.com/settings/tokens) 建立 token，勾選 `read:packages` 權限。
+[點此建立 token](https://github.com/settings/tokens/new?description=js-gcp-logger&scopes=read:packages)（已預選 `read:packages` 權限），或手動前往 GitHub Settings 建立。
 
 詳細步驟請參考 [GitHub 官方文件](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry#authenticating-to-github-packages)。
 
