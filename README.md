@@ -24,12 +24,14 @@
 ### 2. 配置 npm
 
 ```bash
-# 設定 registry
-npm config set @taiwanta:registry https://npm.pkg.github.com
+# 設定 registry（全域）
+npm config set --global @taiwanta:registry https://npm.pkg.github.com
 
-# 設定認證 token
-npm config set //npm.pkg.github.com/:_authToken YOUR_GITHUB_PAT
+# 設定認證 token（全域）
+npm config set --global //npm.pkg.github.com/:_authToken YOUR_GITHUB_PAT
 ```
+
+> 移除 `--global` 可改為專案層級設定（寫入當前目錄的 `.npmrc`）。
 
 ### 3. 安裝套件
 
