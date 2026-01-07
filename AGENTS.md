@@ -4,8 +4,7 @@
 零配置 GCP 日誌整合，使用 `loglayer` + `pino`。
 - 生產環境：pino + @google-cloud/pino-logging-gcp-config
 - 開發環境：@loglayer/transport-simple-pretty-terminal
-
-結構簡單：`src/index.ts`（入口）+ `src/index.test.ts`（測試）
+- Hono middleware：自動關聯 GCP trace context
 </project_overview>
 
 <commands>
@@ -120,9 +119,22 @@ it('當 NODE_ENV 為 production 時應使用生產環境傳輸', () => {})
 ```
 js-gcp-logger/
 ├── src/
-│   ├── index.ts          # 主入口，所有匯出
-│   └── index.test.ts     # 測試
-├── dist/                  # 編譯輸出（gitignore）
+│   ├── index.ts              # 主入口，所有匯出
+│   ├── index.test.ts         # 主入口測試
+│   ├── context.ts            # AsyncLocalStorage 管理、trace 解析
+│   ├── context.test.ts       # context 測試
+│   └── middleware/
+│       └── hono/
+│           ├── index.ts              # Hono middleware
+│           ├── index.test.ts         # middleware 單元測試
+│           └── integration.test.ts   # middleware 整合測試
+├── examples/
+│   ├── basic.js              # 基本使用範例
+│   ├── hono-server.ts        # Hono 測試伺服器
+│   ├── deploy-to-cloudrun.sh # Cloud Run 部署腳本
+│   └── test-middleware.sh    # 本地驗證腳本
+├── Dockerfile                # Cloud Run 部署用
+├── dist/                     # 編譯輸出（gitignore）
 ├── package.json
 ├── tsconfig.json
 └── vitest.config.ts

@@ -8,8 +8,6 @@ RUN npm ci
 COPY . .
 RUN npm run build
 
-RUN npm install @hono/node-server tsx
-
 ENV NODE_ENV=production
 ENV PORT=8080
 

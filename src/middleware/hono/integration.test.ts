@@ -5,26 +5,14 @@ import { gcpLoggerMiddleware } from './index'
 
 describe('Hono Middleware 整合測試（使用真實 LogLayer）', () => {
   let originalEnv: NodeJS.ProcessEnv
-  let capturedLogs: string[] = []
-  let originalStdoutWrite: typeof process.stdout.write
 
   beforeEach(() => {
     originalEnv = { ...process.env }
     process.env.NODE_ENV = 'development'
-    capturedLogs = []
-
-    originalStdoutWrite = process.stdout.write.bind(process.stdout)
-    process.stdout.write = ((chunk: string | Uint8Array) => {
-      if (typeof chunk === 'string') {
-        capturedLogs.push(chunk)
-      }
-      return true
-    }) as typeof process.stdout.write
   })
 
   afterEach(() => {
     process.env = originalEnv
-    process.stdout.write = originalStdoutWrite
     vi.restoreAllMocks()
   })
 

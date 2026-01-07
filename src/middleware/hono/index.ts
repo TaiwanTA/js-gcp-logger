@@ -30,14 +30,13 @@ export function gcpLoggerMiddleware(
   options: GcpLoggerMiddlewareOptions
 ): MiddlewareHandler {
   const { logger } = options
+  const projectId =
+    options.projectId ??
+    process.env.GOOGLE_CLOUD_PROJECT ??
+    process.env.GCLOUD_PROJECT ??
+    'unknown-project'
 
   return async (c, next) => {
-    const projectId =
-      options.projectId ??
-      process.env.GOOGLE_CLOUD_PROJECT ??
-      process.env.GCLOUD_PROJECT ??
-      'unknown-project'
-
     const traceHeader = c.req.header(GCP_TRACE_HEADER)
     const existingRequestId = c.req.header(REQUEST_ID_HEADER)
 
