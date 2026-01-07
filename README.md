@@ -13,33 +13,6 @@
 
 ## 安裝
 
-此套件發布於 GitHub Packages，安裝前需配置認證：
-
-### 1. 建立 Personal Access Token (PAT)
-
-[點此建立 token](https://github.com/settings/tokens/new?description=js-gcp-logger&scopes=read:packages)（已預選 `read:packages` 權限），或手動前往 GitHub Settings 建立。
-
-詳細步驟請參考 [GitHub 官方文件](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-npm-registry#authenticating-to-github-packages)。
-
-### 2. 配置 .npmrc
-
-在 `~/.npmrc`（全域）或專案目錄的 `.npmrc` 中加入：
-
-```ini
-@taiwanta:registry=https://npm.pkg.github.com
-//npm.pkg.github.com/:_authToken=YOUR_GITHUB_PAT
-```
-
-或使用指令建立：
-
-```bash
-# 全域設定（~/.npmrc）
-echo "@taiwanta:registry=https://npm.pkg.github.com" >> ~/.npmrc
-echo "//npm.pkg.github.com/:_authToken=YOUR_GITHUB_PAT" >> ~/.npmrc
-```
-
-### 3. 安裝套件
-
 ```bash
 npm install @taiwanta/js-gcp-logger
 ```

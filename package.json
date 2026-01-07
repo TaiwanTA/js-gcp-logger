@@ -33,7 +33,8 @@
     "url": "https://github.com/TaiwanTA/js-gcp-logger.git"
   },
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
+    "registry": "https://registry.npmjs.org",
+    "access": "public"
   },
   "dependencies": {
     "@google-cloud/pino-logging-gcp-config": "^1.3.1",
