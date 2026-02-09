@@ -1,0 +1,49 @@
+# Dependabot 自動更新設定
+# 文件：https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # npm 依賴更新
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      timezone: "Asia/Taipei"
+    # 限制同時開啟的 PR 數量
+    open-pull-requests-limit: 10
+    # PR 標籤
+    labels:
+      - "dependencies"
+    # 提交訊息前綴
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(dev-deps)"
+    # 忽略開發依賴
+    ignore:
+      - dependency-name: "*"
+        dependency-type: "development"
+    # 依版本更新類型分組，減少 PR 數量
+    groups:
+      # 生產依賴：loglayer 相關套件一起更新
+      loglayer:
+        patterns:
+          - "loglayer"
+          - "@loglayer/*"
+      # 生產依賴：GCP 相關套件一起更新
+      gcp:
+        patterns:
+          - "@google-cloud/*"
+
+  # GitHub Actions 更新
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      timezone: "Asia/Taipei"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "chore(ci)"
