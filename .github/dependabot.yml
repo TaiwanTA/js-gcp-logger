@@ -34,6 +34,10 @@ updates:
       gcp:
         patterns:
           - "@google-cloud/*"
+      # 其餘生產依賴（pino、serialize-error 等）
+      other-prod-deps:
+        patterns:
+          - "*"
 
   # GitHub Actions 更新
   - package-ecosystem: "github-actions"
