@@ -72,3 +72,103 @@ describe('createLogger', () => {
     expect(logger).toBeInstanceOf(LogLayer)
   })
 })
+
+describe('生產環境 transport 輸出格式', () => {
+  let originalEnv: NodeJS.ProcessEnv
+
+  beforeEach(() => {
+    originalEnv = { ...process.env }
+    process.env.NODE_ENV = 'production'
+  })
+
+  afterEach(() => {
+    process.env = originalEnv
+    vi.restoreAllMocks()
+  })
+
+  it('應該輸出包含 severity 欄位而非 level 欄位', () => {
+    const consoleSpy = vi.spyOn(console, 'info').mockImplementation(() => {})
+    const logger = createLogger({ environment: 'production' })
+    logger.info('test message')
+    expect(consoleSpy).toHaveBeenCalled()
+    const output = JSON.parse(consoleSpy.mock.calls[0][0])
+    expect(output.severity).toBe('INFO')
+    expect(output.level).toBeUndefined()
+  })
+
+  it('應該將 trace 級別映射為 DEBUG', () => {
+    const consoleInfoSpy = vi.spyOn(console, 'info').mockImplementation(() => {})
+    const consoleDebugSpy = vi.spyOn(console, 'debug').mockImplementation(() => {})
+    const consoleTraceSpy = vi.spyOn(console, 'trace').mockImplementation(() => {})
+    const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+    const logger = createLogger({ environment: 'production' })
+    logger.trace('trace message')
+    const calls = consoleInfoSpy.mock.calls.length > 0 ? consoleInfoSpy.mock.calls : (consoleDebugSpy.mock.calls.length > 0 ? consoleDebugSpy.mock.calls : (consoleTraceSpy.mock.calls.length > 0 ? consoleTraceSpy.mock.calls : consoleLogSpy.mock.calls))
+    expect(calls.length).toBeGreaterThan(0)
+    const output = JSON.parse(calls[0][0])
+    expect(output.severity).toBe('DEBUG')
+  })
+
+  it('應該將 debug 級別映射為 DEBUG', () => {
+    const consoleInfoSpy = vi.spyOn(console, 'info').mockImplementation(() => {})
+    const consoleDebugSpy = vi.spyOn(console, 'debug').mockImplementation(() => {})
+    const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+    const logger = createLogger({ environment: 'production' })
+    logger.debug('debug message')
+    const calls = consoleInfoSpy.mock.calls.length > 0 ? consoleInfoSpy.mock.calls : (consoleDebugSpy.mock.calls.length > 0 ? consoleDebugSpy.mock.calls : consoleLogSpy.mock.calls)
+    expect(calls.length).toBeGreaterThan(0)
+    const output = JSON.parse(calls[0][0])
+    expect(output.severity).toBe('DEBUG')
+  })
+
+  it('應該將 warn 級別映射為 WARNING', () => {
+    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const logger = createLogger({ environment: 'production' })
+    logger.warn('warn message')
+    const output = JSON.parse(consoleSpy.mock.calls[0][0])
+    expect(output.severity).toBe('WARNING')
+  })
+
+  it('應該將 error 級別映射為 ERROR', () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const logger = createLogger({ environment: 'production' })
+    logger.error('error message')
+    const output = JSON.parse(consoleSpy.mock.calls[0][0])
+    expect(output.severity).toBe('ERROR')
+  })
+
+  it('應該將 fatal 級別映射為 CRITICAL', () => {
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const logger = createLogger({ environment: 'production' })
+    logger.fatal('fatal message')
+    const output = JSON.parse(consoleSpy.mock.calls[0][0])
+    expect(output.severity).toBe('CRITICAL')
+  })
+
+  it('應該輸出包含 message 欄位而非 msg 欄位', () => {
+    const consoleSpy = vi.spyOn(console, 'info').mockImplementation(() => {})
+    const logger = createLogger({ environment: 'production' })
+    logger.info('test message content')
+    const output = JSON.parse(consoleSpy.mock.calls[0][0])
+    expect(output.message).toBe('test message content')
+    expect(output.msg).toBeUndefined()
+  })
+
+  it('應該在輸出中包含 withContext 注入的資料', () => {
+    const consoleSpy = vi.spyOn(console, 'info').mockImplementation(() => {})
+    const logger = createLogger({ environment: 'production' })
+    const contextLogger = logger.withContext({ 'logging.googleapis.com/trace': 'projects/test/traces/abc123' })
+    contextLogger.info('message with context')
+    const output = JSON.parse(consoleSpy.mock.calls[0][0])
+    expect(output['logging.googleapis.com/trace']).toBe('projects/test/traces/abc123')
+  })
+
+  it('應該輸出合法的 JSON 字串', () => {
+    const consoleSpy = vi.spyOn(console, 'info').mockImplementation(() => {})
+    const logger = createLogger({ environment: 'production' })
+    logger.info('json validation test')
+    expect(() => {
+      JSON.parse(consoleSpy.mock.calls[0][0])
+    }).not.toThrow()
+  })
+})
