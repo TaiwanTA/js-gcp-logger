@@ -1,12 +1,12 @@
 # js-gcp-logger
 
-零配置的 GCP 日誌整合，使用 `loglayer` + `pino` 為 Node.js 應用。
+零配置的 GCP 日誌整合，使用 `loglayer` 為 Node.js 應用。
 
 ## 特性
 
 - 🚀 **零配置**：開箱即用，具有合理的預設值
 - 🔄 **自動切換傳輸**：自動偵測環境並使用適當的傳輸
-  - 生產環境 (GCP Cloud Run)：`pino` + `@google-cloud/pino-logging-gcp-config`
+  - 生產環境 (GCP Cloud Run)：loglayer `StructuredTransport`（GCP 相容結構化 JSON）
   - 開發環境：`@loglayer/transport-simple-pretty-terminal`
 - 🔗 **請求追蹤**：透過 Hono middleware 自動關聯 GCP trace context
 - 🎯 **型別安全**：完整的 TypeScript 支援
@@ -150,7 +150,7 @@ orderLogger.info('處理完成')  // 自動包含 orderId
 | 環境 | 傳輸 | 輸出格式 |
 |------|------|----------|
 | 開發 (`NODE_ENV=development`) | pretty-terminal | 彩色、易讀 |
-| 生產 (`NODE_ENV=production` 或 Cloud Run) | pino + GCP config | 結構化 JSON |
+| 生產 (`NODE_ENV=production` 或 Cloud Run) | StructuredTransport | 結構化 JSON |
 
 環境偵測順序：
 1. `NODE_ENV` 環境變數

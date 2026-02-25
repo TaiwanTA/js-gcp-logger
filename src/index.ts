@@ -1,10 +1,21 @@
-import { LogLayer } from 'loglayer'
-import pino from 'pino'
+import { LogLayer, StructuredTransport } from 'loglayer'
 import { serializeError } from 'serialize-error'
-import { createGcpLoggingPinoConfig } from '@google-cloud/pino-logging-gcp-config'
-import { PinoTransport } from '@loglayer/transport-pino'
 import { getSimplePrettyTerminal } from '@loglayer/transport-simple-pretty-terminal'
+
 import type { ILogLayer, LogLayerTransport } from 'loglayer'
+
+/**
+ * GCP Cloud Logging severity 對應表
+ * @see https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity
+ */
+const GCP_SEVERITY_MAP: Record<string, string> = {
+  trace: 'DEBUG',
+  debug: 'DEBUG',
+  info: 'INFO',
+  warn: 'WARNING',
+  error: 'ERROR',
+  fatal: 'CRITICAL',
+}
 
 /**
  * Logger 型別別名，對應 LogLayer
@@ -46,7 +57,7 @@ function detectEnvironment(): string {
  * 建立具有自動傳輸切換功能的 logger 實例（依據環境）
  * 
  * 在生產環境（例如 GCP Cloud Run）：
- * - 使用 pino + @google-cloud/pino-logging-gcp-config
+ * - 使用 loglayer StructuredTransport 輸出 GCP 相容的結構化 JSON
  * 
  * 在開發環境：
  * - 使用 @loglayer/transport-simple-pretty-terminal
@@ -74,12 +85,15 @@ export function createLogger(options?: LoggerOptions): Logger {
   const errorSerializer = options?.errorSerializer ?? serializeError
   const transport: LogLayerTransport[] = []
 
-  // 生產環境：使用 pino 搭配 GCP 設定
+  // 生產環境：使用 StructuredTransport，輸出 GCP 相容的結構化 JSON
   if (environment === 'production') {
-    const loggerConfig = createGcpLoggingPinoConfig()
     transport.push(
-      new PinoTransport({
-        logger: pino(loggerConfig as any),
+      new StructuredTransport({
+        logger: console,
+        messageField: 'message',
+        levelField: 'severity',
+        levelFn: (level) => GCP_SEVERITY_MAP[level] ?? 'DEFAULT',
+        stringify: true,
       })
     )
   } else {
