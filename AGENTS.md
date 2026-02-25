@@ -1,8 +1,8 @@
 # AGENTS.md - js-gcp-logger
 
 <project_overview>
-零配置 GCP 日誌整合，使用 `loglayer` + `pino`。
-- 生產環境：pino + @google-cloud/pino-logging-gcp-config
+零配置 GCP 日誌整合，使用 `loglayer`。
+- 生產環境：loglayer StructuredTransport（GCP 相容結構化 JSON）
 - 開發環境：@loglayer/transport-simple-pretty-terminal
 - Hono middleware：自動關聯 GCP trace context
 </project_overview>
@@ -46,7 +46,6 @@ npx vitest run -t "應該建立 LogLayer 實例"
 ```typescript
 // 1. 外部套件
 import { LogLayer } from 'loglayer'
-import pino from 'pino'
 
 // 2. 內部模組
 import { someUtil } from './utils'
@@ -156,18 +155,16 @@ export { LogLayer }
 <known_issues>
 ## 已知問題與陷阱
 
-1. **pino 類型不相容**：`createGcpLoggingPinoConfig()` 需用 `as any` 轉換
-   - 這是上游類型問題，保持現狀
 
-2. **ESM 模組**：專案使用 `"type": "module"`，相對路徑 import 需注意
+1. **ESM 模組**：專案使用 `"type": "module"`，相對路徑 import 需注意
 
-3. **測試隔離**：環境變數測試必須在 beforeEach/afterEach 中隔離
+2. **測試隔離**：環境變數測試必須在 beforeEach/afterEach 中隔離
 </known_issues>
 
 <dependencies>
 ## 依賴
 
-**生產**：loglayer, pino, @google-cloud/pino-logging-gcp-config, @loglayer/transport-pino, @loglayer/transport-simple-pretty-terminal, serialize-error
+**生產**：loglayer, @loglayer/transport-simple-pretty-terminal, serialize-error
 
 **開發**：typescript ^5.7, vitest ^4.0, @types/node ^22
 

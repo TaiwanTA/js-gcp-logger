@@ -1,7 +1,7 @@
 {
   "name": "@taiwanta/js-gcp-logger",
   "version": "0.2.3",
-  "description": "Zero-config GCP logger integration with loglayer + pino",
+  "description": "Zero-config GCP logger integration with loglayer",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
