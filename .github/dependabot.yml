@@ -19,10 +19,9 @@ updates:
     commit-message:
       prefix: "chore(deps)"
       prefix-development: "chore(dev-deps)"
-    # 忽略開發依賴
-    ignore:
-      - dependency-name: "*"
-        dependency-type: "development"
+    # 只更新生產依賴
+    allow:
+      - dependency-type: "production"
     # 依版本更新類型分組，減少 PR 數量
     groups:
       # 生產依賴：loglayer 相關套件一起更新
