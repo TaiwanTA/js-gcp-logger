@@ -86,6 +86,17 @@ describe('生產環境 transport 輸出格式', () => {
     vi.restoreAllMocks()
   })
 
+  /**
+   * 從多個 console spy 中找到第一個有被呼叫的，並解析其 JSON 輸出
+   */
+  function parseConsolePayload(...spies: ReturnType<typeof vi.spyOn>[]) {
+    const spy = spies.find((s) => s.mock.calls.length > 0)
+    if (!spy) {
+      throw new Error('沒有任何 console spy 被呼叫')
+    }
+    return JSON.parse(spy.mock.calls[0][0] as string)
+  }
+
   it('應該輸出包含 severity 欄位而非 level 欄位', () => {
     const consoleSpy = vi.spyOn(console, 'info').mockImplementation(() => {})
     const logger = createLogger({ environment: 'production' })
@@ -103,9 +114,7 @@ describe('生產環境 transport 輸出格式', () => {
     const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
     const logger = createLogger({ environment: 'production' })
     logger.trace('trace message')
-    const calls = consoleInfoSpy.mock.calls.length > 0 ? consoleInfoSpy.mock.calls : (consoleDebugSpy.mock.calls.length > 0 ? consoleDebugSpy.mock.calls : (consoleTraceSpy.mock.calls.length > 0 ? consoleTraceSpy.mock.calls : consoleLogSpy.mock.calls))
-    expect(calls.length).toBeGreaterThan(0)
-    const output = JSON.parse(calls[0][0])
+    const output = parseConsolePayload(consoleInfoSpy, consoleDebugSpy, consoleTraceSpy, consoleLogSpy)
     expect(output.severity).toBe('DEBUG')
   })
 
@@ -115,9 +124,7 @@ describe('生產環境 transport 輸出格式', () => {
     const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
     const logger = createLogger({ environment: 'production' })
     logger.debug('debug message')
-    const calls = consoleInfoSpy.mock.calls.length > 0 ? consoleInfoSpy.mock.calls : (consoleDebugSpy.mock.calls.length > 0 ? consoleDebugSpy.mock.calls : consoleLogSpy.mock.calls)
-    expect(calls.length).toBeGreaterThan(0)
-    const output = JSON.parse(calls[0][0])
+    const output = parseConsolePayload(consoleInfoSpy, consoleDebugSpy, consoleLogSpy)
     expect(output.severity).toBe('DEBUG')
   })
 

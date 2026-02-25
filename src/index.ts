@@ -5,6 +5,19 @@ import { getSimplePrettyTerminal } from '@loglayer/transport-simple-pretty-termi
 import type { ILogLayer, LogLayerTransport } from 'loglayer'
 
 /**
+ * GCP Cloud Logging severity 對應表
+ * @see https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity
+ */
+const GCP_SEVERITY_MAP: Record<string, string> = {
+  trace: 'DEBUG',
+  debug: 'DEBUG',
+  info: 'INFO',
+  warn: 'WARNING',
+  error: 'ERROR',
+  fatal: 'CRITICAL',
+}
+
+/**
  * Logger 型別別名，對應 LogLayer
  */
 export type Logger = ILogLayer
@@ -79,17 +92,7 @@ export function createLogger(options?: LoggerOptions): Logger {
         logger: console,
         messageField: 'message',
         levelField: 'severity',
-        levelFn: (level) => {
-          const map: Record<string, string> = {
-            trace: 'DEBUG',
-            debug: 'DEBUG',
-            info: 'INFO',
-            warn: 'WARNING',
-            error: 'ERROR',
-            fatal: 'CRITICAL',
-          }
-          return map[level] ?? 'DEFAULT'
-        },
+        levelFn: (level) => GCP_SEVERITY_MAP[level] ?? 'DEFAULT',
         stringify: true,
       })
     )
