@@ -149,13 +149,11 @@ console.log(
 console.log('')
 
 // 優雅關閉
-process.on('SIGINT', () => {
-  console.log('\n收到 SIGINT，正在關閉伺服器...')
+function gracefulShutdown(signal: string) {
+  console.log(`\n收到 ${signal}，正在關閉伺服器...`)
   server.stop()
   process.exit(0)
-})
-process.on('SIGTERM', () => {
-  console.log('\n收到 SIGTERM，正在關閉伺服器...')
-  server.stop()
-  process.exit(0)
-})
+}
+
+process.on('SIGINT', () => gracefulShutdown('SIGINT'))
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'))
