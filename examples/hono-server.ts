@@ -2,7 +2,7 @@
  * Hono 測試伺服器 - 用於驗證 GCP Logger Middleware
  *
  * 執行方式：
- *   npx tsx examples/hono-server.ts
+ *   bun run examples/hono-server.ts
  *
  * 測試指令：
  *   curl http://localhost:3000/
@@ -10,7 +10,6 @@
  *   curl -H "X-Cloud-Trace-Context: 105445aa7843bc8bf206b12000100000/1;o=1" http://localhost:3000/debug
  */
 
-import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { createLogger, getRequestLogger, getTraceContext } from '../dist/index.js'
 import { gcpLoggerMiddleware } from '../dist/middleware/hono/index.js'
@@ -135,13 +134,26 @@ app.get('/async-test', async (c) => {
 
 const port = Number(process.env.PORT) || 3000
 
-serve({ fetch: app.fetch, port }, (info) => {
-  console.log(`\n🚀 伺服器啟動於 http://localhost:${info.port}`)
-  console.log('\n測試指令：')
-  console.log(`  curl http://localhost:${info.port}/`)
-  console.log(`  curl http://localhost:${info.port}/debug`)
-  console.log(
-    `  curl -H "X-Cloud-Trace-Context: 105445aa7843bc8bf206b12000100000/1;o=1" http://localhost:${info.port}/debug`
-  )
-  console.log('')
+const server = Bun.serve({
+  fetch: app.fetch,
+  port,
 })
+
+console.log(`\n🚀 伺服器啟動於 http://localhost:${server.port}`)
+console.log('\n測試指令：')
+console.log(`  curl http://localhost:${server.port}/`)
+console.log(`  curl http://localhost:${server.port}/debug`)
+console.log(
+  `  curl -H "X-Cloud-Trace-Context: 105445aa7843bc8bf206b12000100000/1;o=1" http://localhost:${server.port}/debug`
+)
+console.log('')
+
+// 優雅關閉
+function gracefulShutdown(signal: string) {
+  console.log(`\n收到 ${signal}，正在關閉伺服器...`)
+  server.stop()
+  process.exit(0)
+}
+
+process.on('SIGINT', () => gracefulShutdown('SIGINT'))
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'))

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach } from 'bun:test'
 import {
   parseCloudTraceHeader,
   formatTraceField,
@@ -160,7 +160,7 @@ describe('AsyncLocalStorage 整合', () => {
   }
 
   afterEach(() => {
-    asyncLocalStorage.disable()
+    // 不呼叫 asyncLocalStorage.disable()，因為 bun 在同一 process 中共享模組狀態
   })
 
   describe('getRequestLogger', () => {

@@ -19,7 +19,7 @@ if ! check_server; then
     echo "❌ 伺服器未在 $BASE_URL 運行"
     echo ""
     echo "請先啟動伺服器："
-    echo "  npx tsx examples/hono-server.ts"
+    echo "  bun run examples/hono-server.ts"
     exit 1
 fi
 

@@ -11,16 +11,16 @@
 ## 建置 / 測試 / Lint 指令
 
 ```bash
-npm run build              # tsc 編譯至 dist/
-npm test                   # vitest run（所有測試）
-npm run test:watch         # vitest（監控模式）
-npm run lint               # tsc --noEmit（類型檢查）
+bun run build              # tsdown 編譯至 dist/
+bun test                   # bun test（所有測試）
+bun test --watch           # bun test（監控模式）
+bun run lint               # tsc --noEmit（類型檢查）
 
 # 單一測試檔案
-npx vitest run src/index.test.ts
+bun test src/index.test.ts
 
 # 單一測試案例（依名稱）
-npx vitest run -t "應該建立 LogLayer 實例"
+bun test -t "應該建立 LogLayer 實例"
 ```
 </commands>
 
@@ -79,11 +79,11 @@ export function createLogger(options?: LoggerOptions): Logger
 <testing>
 ## 測試規範
 
-框架：Vitest（globals 已啟用）
+框架：bun:test
 
 ### 結構範本
 ```typescript
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, mock, spyOn, beforeEach, afterEach } from 'bun:test'
 
 describe('createLogger', () => {
   let originalEnv: NodeJS.ProcessEnv
@@ -94,7 +94,7 @@ describe('createLogger', () => {
 
   afterEach(() => {
     process.env = originalEnv
-    vi.restoreAllMocks()
+    mock.restore()
   })
 
   it('應該建立 LogLayer 實例', () => { /* ... */ })
@@ -136,7 +136,7 @@ js-gcp-logger/
 ├── dist/                     # 編譯輸出（gitignore）
 ├── package.json
 ├── tsconfig.json
-└── vitest.config.ts
+└── bun.lock
 ```
 
 ### 匯出結構
@@ -159,6 +159,8 @@ export { LogLayer }
 1. **ESM 模組**：專案使用 `"type": "module"`，相對路徑 import 需注意
 
 2. **測試隔離**：環境變數測試必須在 beforeEach/afterEach 中隔離
+
+3. **AsyncLocalStorage**：測試中不可呼叫 `asyncLocalStorage.disable()`，因為 bun 在同一 process 中並行執行多個測試檔案，disable 會永久停用共享實例
 </known_issues>
 
 <dependencies>
@@ -166,7 +168,7 @@ export { LogLayer }
 
 **生產**：loglayer, @loglayer/transport-simple-pretty-terminal, serialize-error
 
-**開發**：typescript ^5.7, vitest ^4.0, @types/node ^22
+**開發**：typescript ^5.7, @types/bun, @types/node ^22, tsdown
 
 **發佈**：GitHub Packages (@taiwanta), ESM, Node.js >= 18
 </dependencies>

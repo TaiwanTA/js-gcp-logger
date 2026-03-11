@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, mock, beforeEach, afterEach } from 'bun:test'
 import { Hono } from 'hono'
 import { gcpLoggerMiddleware } from './index'
 import { getRequestLogger, getTraceContext, asyncLocalStorage } from '../../context'
@@ -9,19 +9,19 @@ function createMockLogger(): ILogLayer & { contextData: Record<string, unknown> 
 
   const mockLogger = {
     contextData,
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-    debug: vi.fn(),
-    trace: vi.fn(),
-    fatal: vi.fn(),
-    withContext: vi.fn((ctx: Record<string, unknown>) => {
+    info: mock(),
+    warn: mock(),
+    error: mock(),
+    debug: mock(),
+    trace: mock(),
+    fatal: mock(),
+    withContext: mock((ctx: Record<string, unknown>) => {
       Object.assign(contextData, ctx)
       return mockLogger
     }),
-    withError: vi.fn(() => mockLogger),
-    withMetadata: vi.fn(() => mockLogger),
-    child: vi.fn(() => mockLogger),
+    withError: mock(() => mockLogger),
+    withMetadata: mock(() => mockLogger),
+    child: mock(() => mockLogger),
   } as unknown as ILogLayer & { contextData: Record<string, unknown> }
 
   return mockLogger
@@ -36,8 +36,7 @@ describe('gcpLoggerMiddleware', () => {
 
   afterEach(() => {
     process.env = originalEnv
-    asyncLocalStorage.disable()
-    vi.restoreAllMocks()
+    mock.restore()
   })
 
   describe('Trace Header 解析', () => {

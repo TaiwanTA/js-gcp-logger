@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, mock, spyOn, beforeEach, afterEach } from 'bun:test'
 import { createLogger, LogLayer } from './index'
 
 describe('createLogger', () => {
@@ -12,7 +12,7 @@ describe('createLogger', () => {
   afterEach(() => {
     // 還原環境變數
     process.env = originalEnv
-    vi.restoreAllMocks()
+    mock.restore()
   })
 
   it('應該建立 LogLayer 實例', () => {
@@ -22,13 +22,6 @@ describe('createLogger', () => {
 
   it('當 NODE_ENV 為 development 時應使用開發環境傳輸', () => {
     process.env.NODE_ENV = 'development'
-    
-    // 使用 spy 監控 getSimplePrettyTerminal 的呼叫
-    const getSimplePrettyTerminalSpy = vi.fn()
-    vi.doMock('@loglayer/transport-simple-pretty-terminal', () => ({
-      getSimplePrettyTerminal: getSimplePrettyTerminalSpy
-    }))
-    
     const logger = createLogger()
     expect(logger).toBeInstanceOf(LogLayer)
   })
@@ -83,13 +76,13 @@ describe('生產環境 transport 輸出格式', () => {
 
   afterEach(() => {
     process.env = originalEnv
-    vi.restoreAllMocks()
+    mock.restore()
   })
 
   /**
    * 從多個 console spy 中找到第一個有被呼叫的，並解析其 JSON 輸出
    */
-  function parseConsolePayload(...spies: ReturnType<typeof vi.spyOn>[]) {
+  function parseConsolePayload(...spies: ReturnType<typeof spyOn>[]) {
     const spy = spies.find((s) => s.mock.calls.length > 0)
     if (!spy) {
       throw new Error('沒有任何 console spy 被呼叫')
@@ -98,7 +91,7 @@ describe('生產環境 transport 輸出格式', () => {
   }
 
   it('應該輸出包含 severity 欄位而非 level 欄位', () => {
-    const consoleSpy = vi.spyOn(console, 'info').mockImplementation(() => {})
+    const consoleSpy = spyOn(console, 'info').mockImplementation(() => {})
     const logger = createLogger({ environment: 'production' })
     logger.info('test message')
     expect(consoleSpy).toHaveBeenCalled()
@@ -108,10 +101,10 @@ describe('生產環境 transport 輸出格式', () => {
   })
 
   it('應該將 trace 級別映射為 DEBUG', () => {
-    const consoleInfoSpy = vi.spyOn(console, 'info').mockImplementation(() => {})
-    const consoleDebugSpy = vi.spyOn(console, 'debug').mockImplementation(() => {})
-    const consoleTraceSpy = vi.spyOn(console, 'trace').mockImplementation(() => {})
-    const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+    const consoleInfoSpy = spyOn(console, 'info').mockImplementation(() => {})
+    const consoleDebugSpy = spyOn(console, 'debug').mockImplementation(() => {})
+    const consoleTraceSpy = spyOn(console, 'trace').mockImplementation(() => {})
+    const consoleLogSpy = spyOn(console, 'log').mockImplementation(() => {})
     const logger = createLogger({ environment: 'production' })
     logger.trace('trace message')
     const output = parseConsolePayload(consoleInfoSpy, consoleDebugSpy, consoleTraceSpy, consoleLogSpy)
@@ -119,9 +112,9 @@ describe('生產環境 transport 輸出格式', () => {
   })
 
   it('應該將 debug 級別映射為 DEBUG', () => {
-    const consoleInfoSpy = vi.spyOn(console, 'info').mockImplementation(() => {})
-    const consoleDebugSpy = vi.spyOn(console, 'debug').mockImplementation(() => {})
-    const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+    const consoleInfoSpy = spyOn(console, 'info').mockImplementation(() => {})
+    const consoleDebugSpy = spyOn(console, 'debug').mockImplementation(() => {})
+    const consoleLogSpy = spyOn(console, 'log').mockImplementation(() => {})
     const logger = createLogger({ environment: 'production' })
     logger.debug('debug message')
     const output = parseConsolePayload(consoleInfoSpy, consoleDebugSpy, consoleLogSpy)
@@ -129,7 +122,7 @@ describe('生產環境 transport 輸出格式', () => {
   })
 
   it('應該將 warn 級別映射為 WARNING', () => {
-    const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const consoleSpy = spyOn(console, 'warn').mockImplementation(() => {})
     const logger = createLogger({ environment: 'production' })
     logger.warn('warn message')
     const output = JSON.parse(consoleSpy.mock.calls[0][0])
@@ -137,7 +130,7 @@ describe('生產環境 transport 輸出格式', () => {
   })
 
   it('應該將 error 級別映射為 ERROR', () => {
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const consoleSpy = spyOn(console, 'error').mockImplementation(() => {})
     const logger = createLogger({ environment: 'production' })
     logger.error('error message')
     const output = JSON.parse(consoleSpy.mock.calls[0][0])
@@ -145,7 +138,7 @@ describe('生產環境 transport 輸出格式', () => {
   })
 
   it('應該將 fatal 級別映射為 CRITICAL', () => {
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const consoleSpy = spyOn(console, 'error').mockImplementation(() => {})
     const logger = createLogger({ environment: 'production' })
     logger.fatal('fatal message')
     const output = JSON.parse(consoleSpy.mock.calls[0][0])
@@ -153,7 +146,7 @@ describe('生產環境 transport 輸出格式', () => {
   })
 
   it('應該輸出包含 message 欄位而非 msg 欄位', () => {
-    const consoleSpy = vi.spyOn(console, 'info').mockImplementation(() => {})
+    const consoleSpy = spyOn(console, 'info').mockImplementation(() => {})
     const logger = createLogger({ environment: 'production' })
     logger.info('test message content')
     const output = JSON.parse(consoleSpy.mock.calls[0][0])
@@ -162,7 +155,7 @@ describe('生產環境 transport 輸出格式', () => {
   })
 
   it('應該在輸出中包含 withContext 注入的資料', () => {
-    const consoleSpy = vi.spyOn(console, 'info').mockImplementation(() => {})
+    const consoleSpy = spyOn(console, 'info').mockImplementation(() => {})
     const logger = createLogger({ environment: 'production' })
     const contextLogger = logger.withContext({ 'logging.googleapis.com/trace': 'projects/test/traces/abc123' })
     contextLogger.info('message with context')
@@ -171,7 +164,7 @@ describe('生產環境 transport 輸出格式', () => {
   })
 
   it('應該輸出合法的 JSON 字串', () => {
-    const consoleSpy = vi.spyOn(console, 'info').mockImplementation(() => {})
+    const consoleSpy = spyOn(console, 'info').mockImplementation(() => {})
     const logger = createLogger({ environment: 'production' })
     logger.info('json validation test')
     expect(() => {
