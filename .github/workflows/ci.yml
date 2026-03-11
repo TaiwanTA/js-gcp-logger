@@ -32,6 +32,30 @@ jobs:
       - name: Run tests
         run: bun test
 
+  node-compat:
+    name: Node.js Compatibility
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
   build:
     name: Build
     runs-on: ubuntu-latest

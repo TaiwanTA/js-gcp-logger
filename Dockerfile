@@ -13,4 +13,6 @@ ENV PORT=8080
 
 EXPOSE 8080
 
+USER bun
+
 CMD ["bun", "run", "examples/hono-server.ts"]
