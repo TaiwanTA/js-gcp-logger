@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, mock, beforeEach, afterEach } from 'bun:test'
 import { Hono } from 'hono'
 import { createLogger, getRequestLogger, getTraceContext } from '../../index'
 import { gcpLoggerMiddleware } from './index'
@@ -13,7 +13,7 @@ describe('Hono Middleware 整合測試（使用真實 LogLayer）', () => {
 
   afterEach(() => {
     process.env = originalEnv
-    vi.restoreAllMocks()
+    mock.restore()
   })
 
   describe('端到端請求流程', () => {
