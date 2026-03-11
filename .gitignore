@@ -42,3 +42,7 @@ lerna-debug.log*
 tmp/
 temp/
 *.tmp
+
+# Agent
+.sisyphus/
+
