@@ -101,7 +101,7 @@ export function createLogger(options?: LoggerOptions): Logger {
     transport.push(
       getSimplePrettyTerminal({
         runtime: 'node',
-        viewMode: 'expanded',
+        viewMode: 'inline',
       })
     )
   }
